@@ -19,12 +19,12 @@ interface Options {
 }
 
 export default class SimpleMathsCaptcha {
+    activatorButtonEl: HTMLButtonElement | HTMLInputElement;
     id: string;
     problemFetchOptions: [RequestInfo | URL, RequestInit?, number?];
     ntp: Ntp;
 
     activatorButtonElDefaultProps: string[];
-    activatorButtonEl: HTMLButtonElement | HTMLInputElement;
     formEl: HTMLFormElement;
     fieldEl: HTMLElement;
     answerInputElDefaultProps: string[];
@@ -41,27 +41,14 @@ export default class SimpleMathsCaptcha {
 
     constructor(options: Options) {
         try {
-            const mergedOptions = {
-                ...DEFAULT_INSTANCE_OPTIONS,
-                ...options,
-            };
+            this.activatorButtonEl = options.activatorButtonEl;
 
-            this.activatorButtonEl = mergedOptions.activatorButtonEl;
-            // Activator button should be marked invalid when the form is submitted without
-            // the CAPTCHA being active.
-            this.activatorButtonEl.setCustomValidity("required");
-
-            const fieldEl = this.activatorButtonEl.parentElement;
             const formEl = this.activatorButtonEl.closest("form");
 
-            if (!fieldEl || !formEl) {
-                const errorText = !fieldEl
-                    ? "Input must have a parent element."
-                    : "Input must be a <form> child.";
-                throw new Error(errorText);
+            if (!formEl) {
+                throw new Error("Input must be a child of a <form>.");
             }
 
-            this.ntp = new Ntp(mergedOptions.ntpOptions);
             this.id = "simple-maths-captcha";
 
             if (options.baseId) {
@@ -103,6 +90,11 @@ export default class SimpleMathsCaptcha {
                 options.generatorEndpoint?.fetchOptions,
                 options.generatorEndpoint?.timeoutDuration,
             ];
+            this.ntp = new Ntp(options.ntpOptions);
+
+            // Activator button should be marked invalid when the form is submitted without
+            // the CAPTCHA being active.
+            this.activatorButtonEl.setCustomValidity("required");
             this.activatorButtonElDefaultProps = [];
 
             for (const attr of Array.from(this.activatorButtonEl.attributes)) {
@@ -110,7 +102,7 @@ export default class SimpleMathsCaptcha {
             }
 
             this.formEl = formEl;
-            this.fieldEl = fieldEl;
+            this.fieldEl = this.activatorButtonEl.parentElement || this.formEl;
             const answerInputElProps = {
                 type: "text",
                 id: this.id + "-answer",
@@ -153,8 +145,8 @@ export default class SimpleMathsCaptcha {
                 return;
             });
 
-            if (mergedOptions.answerInputElEventHandlers) {
-                mergedOptions.answerInputElEventHandlers.forEach((handler) => {
+            if (options.answerInputElEventHandlers) {
+                options.answerInputElEventHandlers.forEach((handler) => {
                     this.answerInputEl.addEventListener(
                         handler.type,
                         handler.listener,
