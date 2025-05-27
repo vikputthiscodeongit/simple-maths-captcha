@@ -109,7 +109,7 @@ export default class SimpleMathsCaptcha {
                 name: this.id + "-answer",
                 inputmode: "numeric",
                 minlength: "1",
-                required: "true",
+                required: "required",
             };
             this.answerInputElDefaultProps = Object.keys(answerInputElProps);
             this.answerInputEl = createEl("input", answerInputElProps);
