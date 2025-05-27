@@ -7,7 +7,12 @@ interface DefaultOptions {
 
 interface Options extends Partial<DefaultOptions> {
     activatorButtonEl: HTMLButtonElement | HTMLInputElement;
-    generatorEndpointUrl: string;
+    generatorEndpointUrl?: string;
+    generatorEndpoint?: {
+        url: RequestInfo | URL;
+        fetchOptions?: RequestInit;
+        timeoutDuration?: number;
+    };
     ntpOptions: NtpOptions;
     answerInputElEventHandlers?: {
         type: string;
@@ -21,7 +26,7 @@ const DEFAULT_INSTANCE_OPTIONS: DefaultOptions = {
 };
 
 export default class SimpleMathsCaptcha {
-    generatorEndpointUrl: string;
+    problemFetchOptions: [RequestInfo | URL, RequestInit?, number?];
     ntp: Ntp;
     baseId: string;
     activatorButtonElDefaultProps: string[];
@@ -62,10 +67,29 @@ export default class SimpleMathsCaptcha {
                 throw new Error(errorText);
             }
 
-            this.generatorEndpointUrl = mergedOptions.generatorEndpointUrl;
             this.ntp = new Ntp(mergedOptions.ntpOptions);
             this.baseId = mergedOptions.baseId;
+            if (options.generatorEndpointUrl && options.generatorEndpoint) {
+                console.warn(
+                    "`generatorEndpointUrl` and `generatorEndpoint.url` are both provided. `generatorEndpoint.url` takes preference.",
+                );
+            }
 
+            const generatorEndpointUrl = options.generatorEndpoint
+                ? options.generatorEndpoint.url
+                : options.generatorEndpointUrl;
+
+            if (!generatorEndpointUrl) {
+                throw new Error(
+                    "Problem generator endpoint URL must be provided, either as generatorEndpointUrl or generatorEndpoint.url.",
+                );
+            }
+
+            this.problemFetchOptions = [
+                generatorEndpointUrl,
+                options.generatorEndpoint?.fetchOptions,
+                options.generatorEndpoint?.timeoutDuration,
+            ];
             this.activatorButtonElDefaultProps = [];
 
             for (const attr of Array.from(this.activatorButtonEl.attributes)) {
@@ -250,7 +274,7 @@ export default class SimpleMathsCaptcha {
                 throw new Error("NTP values fetch failed.");
             }
 
-            const response = await fetchWithTimeout(this.generatorEndpointUrl);
+            const response = await fetchWithTimeout(...this.problemFetchOptions);
 
             if (!response.ok) {
                 throw new Error(`Problem fetch failed with HTTP status code ${response.status}.`);
