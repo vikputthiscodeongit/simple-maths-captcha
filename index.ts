@@ -1,12 +1,9 @@
 import { createEl, fetchWithTimeout, wait } from "@codebundlesbyvik/js-helpers";
 import Ntp, { Options as NtpOptions } from "@codebundlesbyvik/ntp-sync";
 
-interface DefaultOptions {
-    baseId: string;
-}
-
-interface Options extends Partial<DefaultOptions> {
+interface Options {
     activatorButtonEl: HTMLButtonElement | HTMLInputElement;
+    baseId?: string;
     generatorEndpointUrl?: string;
     generatorEndpoint?: {
         url: RequestInfo | URL;
@@ -21,14 +18,11 @@ interface Options extends Partial<DefaultOptions> {
     }[];
 }
 
-const DEFAULT_INSTANCE_OPTIONS: DefaultOptions = {
-    baseId: "simple-maths-captcha",
-};
-
 export default class SimpleMathsCaptcha {
+    id: string;
     problemFetchOptions: [RequestInfo | URL, RequestInit?, number?];
     ntp: Ntp;
-    baseId: string;
+
     activatorButtonElDefaultProps: string[];
     activatorButtonEl: HTMLButtonElement | HTMLInputElement;
     formEl: HTMLFormElement;
@@ -68,7 +62,26 @@ export default class SimpleMathsCaptcha {
             }
 
             this.ntp = new Ntp(mergedOptions.ntpOptions);
-            this.baseId = mergedOptions.baseId;
+            this.id = "simple-maths-captcha";
+
+            if (options.baseId) {
+                this.id = options.baseId + "-" + this.id;
+            }
+
+            if (
+                SimpleMathsCaptcha.#instances.find(
+                    (item) =>
+                        item.activatorButtonEl === this.activatorButtonEl || item.id === this.id,
+                )
+            ) {
+                throw new Error("Activator button and/or instance ID already in use.");
+            }
+
+            SimpleMathsCaptcha.#instances.push({
+                activatorButtonEl: this.activatorButtonEl,
+                id: this.id,
+            });
+
             if (options.generatorEndpointUrl && options.generatorEndpoint) {
                 console.warn(
                     "`generatorEndpointUrl` and `generatorEndpoint.url` are both provided. `generatorEndpoint.url` takes preference.",
@@ -100,8 +113,8 @@ export default class SimpleMathsCaptcha {
             this.fieldEl = fieldEl;
             const answerInputElProps = {
                 type: "text",
-                id: this.baseId + "-answer",
-                name: this.baseId + "-answer",
+                id: this.id + "-answer",
+                name: this.id + "-answer",
                 inputmode: "numeric",
                 minlength: "1",
                 required: "true",
@@ -113,13 +126,13 @@ export default class SimpleMathsCaptcha {
             });
             this.digit1InputEl = createEl("input", {
                 type: "hidden",
-                id: this.baseId + "-digit-1",
-                name: this.baseId + "-digit-1",
+                id: this.id + "-digit-1",
+                name: this.id + "-digit-1",
             });
             this.digit2InputEl = createEl("input", {
                 type: "hidden",
-                id: this.baseId + "-digit-2",
-                name: this.baseId + "-digit-2",
+                id: this.id + "-digit-2",
+                name: this.id + "-digit-2",
             });
             this.expiryTimerEl = createEl("span");
             this.loaderEl = createEl("div", {
@@ -157,6 +170,9 @@ export default class SimpleMathsCaptcha {
                 : new Error("Unknown error during initialization!");
         }
     }
+
+    static #instances: { activatorButtonEl: HTMLButtonElement | HTMLInputElement; id: string }[] =
+        [];
 
     isCaptchaInputEl(id: string) {
         return (
