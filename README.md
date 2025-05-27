@@ -5,7 +5,7 @@
 
 Easy to use, easy to solve CAPTCHA.
 
-![simple-maths-captcha](https://github.com/user-attachments/assets/7e036860-1391-4429-ad40-47de2b5f6d67)
+![simple-maths-captcha](https://github.com/user-attachments/assets/b954f9ae-1164-4875-8307-527673a2fd7c)
 
 <br>
 
@@ -24,9 +24,6 @@ Easy to use, easy to solve CAPTCHA.
 
 ## Usage
 
-The form to which the CAPTCHA is linked must contain a button to be used for activating the CAPTCHA.
-Furthermore, the generator endpoint URL must be provided as instance option as well as [options for the NTP time sync library]().
-
 ``` shell
 # Install package from npm
 npm install @codebundlesbyvik/simple-maths-captcha
@@ -35,9 +32,7 @@ npm install @codebundlesbyvik/simple-maths-captcha
 If you're not using a module bundler then either:
 
 * [Download the latest release from the GitHub releases page](https://github.com/vikputthiscodeongit/simple-maths-captcha/releases/latest), or
-* [Load the JavaScript](https://cdn.jsdelivr.net/npm/@codebundlesbyvik/simple-maths-captcha@1.0.0) via the jsdelivr CDN.
-
-And import the JavaScript as a module in your HTML file.
+* [Load the JavaScript](https://cdn.jsdelivr.net/npm/@codebundlesbyvik/simple-maths-captcha@1.1.0/dist/index.js) via the jsdelivr CDN.
 
 For the example below I assume the main JavaScript file is processed by a module bundler.
 
@@ -78,34 +73,30 @@ new SimpleMathsCaptcha({
         },
     }
 });
-
-// That's all!
-// The CAPTCHA initializes on instance creation, activates when the activator button is pressed
-// and automatically deactivates after the CAPTCHA has expired.
 ```
 
-The implementation of the back end components is up to you. If you need some inspiration you can check out [how I did it in PHP for my own website](https://github.com/vikputthiscodeongit/viktor-web/tree/main/components/simple-maths-captcha).
+The CAPTCHA initializes on instance creation. On press of the activator button a NTP sync is performed after which a maths problem is requested. The problem is inserted in the DOM, alongside 3 `<input>`s: the main one in which the user has to provide the answer and 2 hidden ones used to store the problem's individual digits. After the invalidation time provided by the back end has passed the CAPTCHA is automatically deactivated.
+
+The exact implementation of the back end components is up to you. If you need some inspiration you can check out [how I did it in PHP for my own website](https://github.com/vikputthiscodeongit/viktor-web/tree/main/php/controllers).
 
 <br>
 
 ## Browser support
 
-To be specified.
-
-Library is a module and should be supported by recent versions of all current browsers.
+Requires an ECMAScript 2022 (ES13) compatible browser. Practically speaking, all browsers released in 2021 and onwards are fully supported.
 
 <br>
 
 ## Instance options
 
-| Property                                | Type                                                                                                                                    | Default                | Description                                                                                                                                                                                                                                                                   |
-| :-------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------- | :--------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **! REQUIRED !** `activatorButtonEl`    | `HTMLButtonElement` \| `HTMLInputElement`                                                                                               | -                      | Form control which the user presses to activate the CAPTCHA. Must be a child of the `<form>`.                                                                                                                                                                                 |
-| **! REQUIRED !** `ntpOptions`           | `NtpOptions`                                                                                                                            | -                      | [@codebundlesbyvik/ntp-sync]() options.                                                                                                                                                                                                                                       |
-| `answerInputElEventHandlers`            | Object with [`addEventListener()` parameters](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#parameters) | `undefined`            | Event handlers with these options will be added to the `<input>` element in which the user has to provide the answer.                                                                                                                                                         |
+| Property                                                                     | Type                                                                                                                                                                                      | Default     | Description                                                                                                                                                                                                                                                                                                                     |
+| :--------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `activatorButtonEl`<br> **Required**                                         | `HTMLButtonElement` \| `HTMLInputElement`                                                                                                                                                 | -           | Button which the user presses to activate the CAPTCHA. Must be a child of the `<form>`.                                                                                                                                                                                                                                         |
 | `generatorEndpointUrl`<br> **Required if `generatorEndpoint` not provided.** | `string`                                                                                                                                                                                  | -           | URL of the endpoint of the problem generator. Should return an **array** with a **length of 3**, the **first 2 items** being the **digits that compose the maths problem** and the **final item** being a **Unix timestamp in milliseconds after which the problem is invalidated**.                                            |
 | `generatorEndpoint`<br> **Required if `generatorEndpointUrl` not provided.** | [@codebundlesbyvik/js-helpers `fetchWithTimeout` parameters](https://github.com/vikputthiscodeongit/js-helpers?tab=readme-ov-file#fetchwithtimeoutresource-fetchoptions-timeoutduration). | -           | Parameters for the problem generator fetcher.                                                                                                                                                                                                                                                                                   |
+| `ntpOptions`<br> **Required**                                                | [@codebundlesbyvik/ntp-sync options](https://github.com/vikputthiscodeongit/ntp-sync?tab=readme-ov-file#instance-options).                                                                | -           | Options used by the NTP sync library.                                                                                                                                                                                                                                                                                           |
 | `baseId`                                                                     | `string`                                                                                                                                                                                  | -           | Automatically suffixed with `simple-maths-captcha`. Set as HTML `id` & `name` on the `<input>`s generated by the instance, after automatic addition of the `<input>`'s role.<br> E.g. `baseId: "contact-form"` results in `contact-form-simple-maths-captcha-answer` added as HTML `id` & `name` to the main `<input>` element. |
+| `answerInputElEventHandlers`                                                 | [`addEventListener()` parameters](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#parameters).                                                              | `undefined` | Event handlers with these options will be added to the main `<input>` element.                                                                                                                                                                                                                                                  |
 
 <br>
 
@@ -113,15 +104,15 @@ Library is a module and should be supported by recent versions of all current br
 
 ### `.isCaptchaInputEl(id: string)`
 
-Check if the provided `id` matches the `id` of a CATPCHA `<input>` element.
+Check if the provided `id` matches the `id` of a CAPTCHA `<input>` element.
 
 <br>
 
-The following methods are public but don't need to be used because they're called automatically when needed.
+The following methods are automatically called when needed.
 
 ### `.activate()`
 
-Requests a new problem, inserts it and the `<input>` for providing the answer in the DOM.
+Performs NTP sync, requests a new maths problem, inserts it and 3 `<input>`s (one of which used by the user for providing the answer) in the DOM and schedules `.deactivate()` call.
 
 ### `.deactivate()`
 
