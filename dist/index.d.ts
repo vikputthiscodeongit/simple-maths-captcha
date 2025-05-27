@@ -1,10 +1,13 @@
 import Ntp, { Options as NtpOptions } from "@codebundlesbyvik/ntp-sync";
-interface DefaultOptions {
-    baseId: string;
-}
-interface Options extends Partial<DefaultOptions> {
+interface Options {
     activatorButtonEl: HTMLButtonElement | HTMLInputElement;
-    generatorEndpointUrl: string;
+    baseId?: string;
+    generatorEndpointUrl?: string;
+    generatorEndpoint?: {
+        url: RequestInfo | URL;
+        fetchOptions?: RequestInit;
+        timeoutDuration?: number;
+    };
     ntpOptions: NtpOptions;
     answerInputElEventHandlers?: {
         type: string;
@@ -14,11 +17,11 @@ interface Options extends Partial<DefaultOptions> {
 }
 export default class SimpleMathsCaptcha {
     #private;
-    generatorEndpointUrl: string;
-    ntp: Ntp;
-    baseId: string;
-    activatorButtonElDefaultProps: string[];
     activatorButtonEl: HTMLButtonElement | HTMLInputElement;
+    id: string;
+    problemFetchOptions: [RequestInfo | URL, RequestInit?, number?];
+    ntp: Ntp;
+    activatorButtonElDefaultProps: string[];
     formEl: HTMLFormElement;
     fieldEl: HTMLElement;
     answerInputElDefaultProps: string[];
