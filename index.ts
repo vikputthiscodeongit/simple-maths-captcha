@@ -247,10 +247,7 @@ export default class SimpleMathsCaptcha {
         }
 
         clearInterval(this.expiryTimer);
-
-        if (this.expiryTimerAbortController) {
-            this.expiryTimerAbortController.abort("Scheduled deactivation aborted.");
-        }
+        this.expiryTimerAbortController?.abort("Scheduled deactivation aborted.");
 
         this.labelEl.remove();
         this.answerInputEl.remove();
