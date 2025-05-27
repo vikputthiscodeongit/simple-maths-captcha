@@ -159,7 +159,7 @@ export default class SimpleMathsCaptcha {
         } catch (error) {
             throw error instanceof Error
                 ? error
-                : new Error("Unknown error during initialization!");
+                : new Error("Unknown error during initialization.");
         }
     }
 
@@ -178,7 +178,7 @@ export default class SimpleMathsCaptcha {
         console.info("activate: Running...");
 
         if (this.active) {
-            console.info("activate: CAPTCHA already active!");
+            console.warn("CAPTCHA already active.");
             return;
         }
 
@@ -234,7 +234,7 @@ export default class SimpleMathsCaptcha {
         } catch (error) {
             throw error instanceof Error
                 ? error
-                : new Error("Unknown error during CAPTCHA activation!");
+                : new Error("Unknown error during CAPTCHA activation.");
         }
     }
 
@@ -242,7 +242,7 @@ export default class SimpleMathsCaptcha {
         console.info("deactivate: Running...");
 
         if (!this.active) {
-            console.info("activate: CAPTCHA already deactivated!");
+            console.warn("CAPTCHA already deactivated.");
             return;
         }
 
@@ -282,7 +282,7 @@ export default class SimpleMathsCaptcha {
             const response = await fetchWithTimeout(...this.problemFetchOptions);
 
             if (!response.ok) {
-                throw new Error(`Problem fetch failed with HTTP status code ${response.status}.`);
+                throw new Error(`Problem fetch failed.`);
             }
 
             const fetchedData = (await response.json()) as {
@@ -297,7 +297,7 @@ export default class SimpleMathsCaptcha {
 
             return problemData;
         } catch (error) {
-            throw error instanceof Error ? error : new Error("Unknown error during problem fetch!");
+            throw error instanceof Error ? error : new Error("Unknown error during problem fetch.");
         }
     }
 }
