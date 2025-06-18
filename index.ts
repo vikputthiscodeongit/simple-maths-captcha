@@ -52,7 +52,7 @@ export default class SimpleMathsCaptcha {
             this.id = "simple-maths-captcha";
 
             if (options.baseId) {
-                this.id = options.baseId + "-" + this.id;
+                this.id = `${options.baseId}-${this.id}`;
             }
 
             if (
