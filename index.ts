@@ -215,10 +215,7 @@ export default class SimpleMathsCaptcha {
 
                 if (expiryTimeSec < 6) {
                     this.expiryTimerEl.textContent = `Expires in ${expiryTimeSec} s`;
-
-                    if (!document.body.contains(this.expiryTimerEl)) {
-                        this.answerInputEl.after(this.expiryTimerEl);
-                    }
+                    this.answerInputEl.after(this.expiryTimerEl);
                 }
             }, 1000);
 
