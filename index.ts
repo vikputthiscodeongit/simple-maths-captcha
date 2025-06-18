@@ -145,15 +145,13 @@ export default class SimpleMathsCaptcha {
                 return;
             });
 
-            if (options.answerInputElEventHandlers) {
-                options.answerInputElEventHandlers.forEach((handler) => {
-                    this.answerInputEl.addEventListener(
-                        handler.type,
-                        handler.listener,
-                        handler.options,
-                    );
-                });
-            }
+            options.answerInputElEventHandlers?.forEach((handler) => {
+                this.answerInputEl.addEventListener(
+                    handler.type,
+                    handler.listener,
+                    handler.options,
+                );
+            });
 
             return;
         } catch (error) {
