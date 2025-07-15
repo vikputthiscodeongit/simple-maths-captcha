@@ -95,11 +95,9 @@ export default class SimpleMathsCaptcha {
             // Activator button should be marked invalid when the form is submitted without
             // the CAPTCHA being active.
             this.activatorButtonEl.setCustomValidity("required");
-            this.activatorButtonElDefaultProps = [];
-
-            for (const attr of Array.from(this.activatorButtonEl.attributes)) {
-                this.activatorButtonElDefaultProps.push(attr.name);
-            }
+            this.activatorButtonElDefaultProps = Array.from(this.activatorButtonEl.attributes).map(
+                (attr) => attr.name,
+            );
 
             this.formEl = formEl;
             this.fieldEl = this.activatorButtonEl.parentElement || this.formEl;
