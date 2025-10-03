@@ -152,11 +152,39 @@ export default class SimpleMathsCaptcha {
         );
     }
 
+    async #makeProblemData() {
+        console.info("#makeProblemData: Running...");
+
+        const ntpValues = await this.#ntp.sync();
+
+        if (!ntpValues) {
+            throw new Error("NTP values fetch failed.");
+        }
+
+        const response = await fetchWithTimeout(...this.#problemFetchOptions);
+
+        if (!response.ok) {
+            throw new Error(`Problem fetch failed.`);
+        }
+
+        const fetchedData = (await response.json()) as {
+            problem_data: [number, number, number];
+        };
+        console.debug("#makeProblemData - fetchedData:", fetchedData);
+        const [digit1, digit2, invalidAfterTime] = fetchedData.problem_data;
+
+        const expiryTime = Math.ceil(Math.max(invalidAfterTime - ntpValues.correctedDate, 0));
+        const problemData = [digit1, digit2, expiryTime];
+        console.debug("#makeProblemData - problemData:", problemData);
+
+        return problemData;
+    }
+
     async activate() {
         console.info("activate: Running...");
 
         if (this.active) {
-            console.warn("CAPTCHA already active.");
+            console.warn("Already active.");
             return;
         }
 
@@ -202,7 +230,7 @@ export default class SimpleMathsCaptcha {
         console.info("deactivate: Running...");
 
         if (!this.active) {
-            console.warn("CAPTCHA already deactivated.");
+            console.warn("Already deactivated.");
             return;
         }
 
@@ -228,33 +256,5 @@ export default class SimpleMathsCaptcha {
         this.active = false;
 
         return;
-    }
-
-    async #makeProblemData() {
-        console.info("#makeProblemData: Running...");
-
-        const ntpValues = await this.#ntp.sync();
-
-        if (!ntpValues) {
-            throw new Error("NTP values fetch failed.");
-        }
-
-        const response = await fetchWithTimeout(...this.#problemFetchOptions);
-
-        if (!response.ok) {
-            throw new Error(`Problem fetch failed.`);
-        }
-
-        const fetchedData = (await response.json()) as {
-            problem_data: [number, number, number];
-        };
-        console.debug("#makeProblemData - fetchedData:", fetchedData);
-        const [digit1, digit2, invalidAfterTime] = fetchedData.problem_data;
-
-        const expiryTime = Math.ceil(Math.max(invalidAfterTime - ntpValues.correctedDate, 0));
-        const problemData = [digit1, digit2, expiryTime];
-        console.debug("#makeProblemData - problemData:", problemData);
-
-        return problemData;
     }
 }
