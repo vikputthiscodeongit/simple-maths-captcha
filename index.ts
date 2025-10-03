@@ -17,6 +17,7 @@ interface Options {
         listener: () => void;
         options?: AddEventListenerOptions;
     }[];
+    labelElLoadingTextContent?: string;
 }
 
 export default class SimpleMathsCaptcha {
@@ -30,6 +31,7 @@ export default class SimpleMathsCaptcha {
     fieldEl: HTMLElement;
     answerInputElDefaultProps: string[];
     answerInputEl: HTMLInputElement;
+    #labelElLoadingTextContent: string;
     labelEl: HTMLLabelElement;
     digit1InputEl: HTMLInputElement;
     digit2InputEl: HTMLInputElement;
@@ -113,6 +115,8 @@ export default class SimpleMathsCaptcha {
             };
             this.answerInputElDefaultProps = Object.keys(answerInputElProps);
             this.answerInputEl = createEl("input", answerInputElProps);
+            this.#labelElLoadingTextContent =
+                options.labelElLoadingTextContent ?? "Loading CAPTCHA";
             this.labelEl = createEl("label", {
                 for: this.answerInputEl.id,
             });
@@ -186,8 +190,8 @@ export default class SimpleMathsCaptcha {
         try {
             this.activatorButtonEl.remove();
 
-            this.labelEl.textContent = "Loading CAPTCHA";
             this.fieldEl.prepend(this.labelEl, this.loaderEl);
+            this.labelEl.textContent = this.#labelElLoadingTextContent;
 
             this.answerInputEl.value = "";
 
