@@ -11,6 +11,7 @@ interface Options {
         timeoutDuration?: number;
     };
     ntpOptions: NtpOptions;
+    answerInputElClass?: string;
     answerInputElEventHandlers?: {
         type: string;
         listener: () => void;
@@ -104,6 +105,7 @@ export default class SimpleMathsCaptcha {
             const answerInputElProps = {
                 type: "text",
                 id: this.id + "-answer",
+                class: options.answerInputElClass ?? null,
                 name: this.id + "-answer",
                 inputmode: "numeric",
                 minlength: "1",
