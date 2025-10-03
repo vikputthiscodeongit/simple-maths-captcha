@@ -24,13 +24,13 @@ interface Options {
 export default class SimpleMathsCaptcha {
     activatorButtonEl: HTMLButtonElement | HTMLInputElement;
     id: string;
-    problemFetchOptions: [RequestInfo | URL, RequestInit?, number?];
     #ntp: Ntp;
+    #problemFetchOptions: [RequestInfo | URL, RequestInit?, number?];
 
-    activatorButtonElDefaultProps: string[];
+    #activatorButtonElDefaultProps: string[];
     formEl: HTMLFormElement;
     fieldEl: HTMLElement;
-    answerInputElDefaultProps: string[];
+    #answerInputElDefaultProps: string[];
     answerInputEl: HTMLInputElement;
     #labelElLoadingTextContent: string;
     labelEl: HTMLLabelElement;
@@ -83,8 +83,8 @@ export default class SimpleMathsCaptcha {
                 );
             }
 
-            this.problemFetchOptions = [
             this.#ntp = options.ntp;
+            this.#problemFetchOptions = [
                 generatorEndpointUrl,
                 options.generatorEndpoint?.fetchOptions,
                 options.generatorEndpoint?.timeoutDuration,
@@ -93,7 +93,7 @@ export default class SimpleMathsCaptcha {
             // Activator button should be marked invalid when the form is submitted without
             // the CAPTCHA being active.
             this.activatorButtonEl.setCustomValidity("required");
-            this.activatorButtonElDefaultProps = Array.from(this.activatorButtonEl.attributes).map(
+            this.#activatorButtonElDefaultProps = Array.from(this.activatorButtonEl.attributes).map(
                 (attr) => attr.name,
             );
 
@@ -108,7 +108,7 @@ export default class SimpleMathsCaptcha {
                 minlength: "1",
                 required: "required",
             };
-            this.answerInputElDefaultProps = Object.keys(answerInputElProps);
+            this.#answerInputElDefaultProps = Object.keys(answerInputElProps);
             this.answerInputEl = createEl("input", answerInputElProps);
             this.#labelElLoadingTextContent =
                 options.labelElLoadingTextContent ?? "Loading CAPTCHA";
@@ -191,7 +191,7 @@ export default class SimpleMathsCaptcha {
             this.answerInputEl.value = "";
 
             for (const attr of Array.from(this.answerInputEl.attributes)) {
-                if (this.answerInputElDefaultProps.includes(attr.name)) continue;
+                if (this.#answerInputElDefaultProps.includes(attr.name)) continue;
 
                 this.answerInputEl.removeAttribute(attr.name);
             }
@@ -239,7 +239,7 @@ export default class SimpleMathsCaptcha {
         }
 
         for (const attr of Array.from(this.activatorButtonEl.attributes)) {
-            if (this.activatorButtonElDefaultProps.includes(attr.name)) continue;
+            if (this.#activatorButtonElDefaultProps.includes(attr.name)) continue;
 
             this.activatorButtonEl.removeAttribute(attr.name);
         }
@@ -261,7 +261,7 @@ export default class SimpleMathsCaptcha {
                 throw new Error("NTP values fetch failed.");
             }
 
-            const response = await fetchWithTimeout(...this.problemFetchOptions);
+            const response = await fetchWithTimeout(...this.#problemFetchOptions);
 
             if (!response.ok) {
                 throw new Error(`Problem fetch failed.`);
