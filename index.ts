@@ -18,6 +18,7 @@ interface Options {
         options?: AddEventListenerOptions;
     }[];
     labelElLoadingTextContent?: string;
+    loaderEl?: HTMLElement;
 }
 
 export default class SimpleMathsCaptcha {
@@ -36,7 +37,7 @@ export default class SimpleMathsCaptcha {
     digit1InputEl: HTMLInputElement;
     digit2InputEl: HTMLInputElement;
     expiryTimerEl: HTMLSpanElement;
-    loaderEl: HTMLDivElement;
+    loaderEl: HTMLElement | null;
 
     active: boolean;
     expiryTimer: ReturnType<typeof setInterval> | undefined;
@@ -131,9 +132,7 @@ export default class SimpleMathsCaptcha {
                 name: this.id + "-digit-2",
             });
             this.expiryTimerEl = createEl("span");
-            this.loaderEl = createEl("div", {
-                class: "spinner spinner--lg",
-            });
+            this.loaderEl = options.loaderEl ?? null;
 
             this.active = false;
             this.expiryTimer = undefined;
@@ -190,8 +189,12 @@ export default class SimpleMathsCaptcha {
         try {
             this.activatorButtonEl.remove();
 
-            this.fieldEl.prepend(this.labelEl, this.loaderEl);
             this.labelEl.textContent = this.#labelElLoadingTextContent;
+            this.fieldEl.prepend(this.labelEl);
+
+            if (this.loaderEl) {
+                this.labelEl.after(this.loaderEl);
+            }
 
             this.answerInputEl.value = "";
 
@@ -208,7 +211,6 @@ export default class SimpleMathsCaptcha {
             this.digit2InputEl.value = digit2.toString();
             this.labelEl.after(this.answerInputEl, this.digit1InputEl, this.digit2InputEl);
 
-            this.loaderEl.remove();
 
             let expiryTimeSec = Math.round(expiryTime / 1000);
 
@@ -224,6 +226,9 @@ export default class SimpleMathsCaptcha {
             await wait(expiryTime, true, this.expiryTimerAbortController.signal)
                 .then(() => {
                     clearInterval(this.expiryTimer);
+            if (this.loaderEl) {
+                this.loaderEl.remove();
+            }
 
                     this.deactivate();
                 })
@@ -253,7 +258,10 @@ export default class SimpleMathsCaptcha {
         this.digit1InputEl.remove();
         this.digit2InputEl.remove();
         this.expiryTimerEl.remove();
-        this.loaderEl.remove();
+
+        if (this.loaderEl) {
+            this.loaderEl.remove();
+        }
 
         for (const attr of Array.from(this.activatorButtonEl.attributes)) {
             if (this.activatorButtonElDefaultProps.includes(attr.name)) continue;
