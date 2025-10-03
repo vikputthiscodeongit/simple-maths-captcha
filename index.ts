@@ -1,16 +1,16 @@
 import { createEl, fetchWithTimeout, wait } from "@codebundlesbyvik/js-helpers";
-import Ntp, { Options as NtpOptions } from "@codebundlesbyvik/ntp-sync";
+import Ntp from "@codebundlesbyvik/ntp-sync";
 
 interface Options {
     activatorButtonEl: HTMLButtonElement | HTMLInputElement;
     id?: string;
+    ntp: Ntp;
     generatorEndpointUrl?: string;
     generatorEndpoint?: {
         url: RequestInfo | URL;
         fetchOptions?: RequestInit;
         timeoutDuration?: number;
     };
-    ntpOptions: NtpOptions;
     answerInputElClass?: string;
     answerInputElEventHandlers?: {
         type: string;
@@ -25,7 +25,7 @@ export default class SimpleMathsCaptcha {
     activatorButtonEl: HTMLButtonElement | HTMLInputElement;
     id: string;
     problemFetchOptions: [RequestInfo | URL, RequestInit?, number?];
-    ntp: Ntp;
+    #ntp: Ntp;
 
     activatorButtonElDefaultProps: string[];
     formEl: HTMLFormElement;
@@ -84,11 +84,11 @@ export default class SimpleMathsCaptcha {
             }
 
             this.problemFetchOptions = [
+            this.#ntp = options.ntp;
                 generatorEndpointUrl,
                 options.generatorEndpoint?.fetchOptions,
                 options.generatorEndpoint?.timeoutDuration,
             ];
-            this.ntp = new Ntp(options.ntpOptions);
 
             // Activator button should be marked invalid when the form is submitted without
             // the CAPTCHA being active.
@@ -255,7 +255,7 @@ export default class SimpleMathsCaptcha {
         console.info("#makeProblemData: Running...");
 
         try {
-            const ntpValues = await this.ntp.sync();
+            const ntpValues = await this.#ntp.sync();
 
             if (!ntpValues) {
                 throw new Error("NTP values fetch failed.");
