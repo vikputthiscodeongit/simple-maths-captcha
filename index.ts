@@ -36,12 +36,10 @@ export default class SimpleMathsCaptcha {
     labelEl: HTMLLabelElement;
     digit1InputEl: HTMLInputElement;
     digit2InputEl: HTMLInputElement;
-    expiryTimerEl: HTMLSpanElement;
     loaderEl: HTMLElement | null;
 
     active: boolean;
-    expiryTimer: ReturnType<typeof setInterval> | undefined;
-    expiryTimerAbortController: AbortController | undefined;
+    #expiryTimerAbortController: AbortController | null;
 
     constructor(options: Options) {
         try {
@@ -131,12 +129,10 @@ export default class SimpleMathsCaptcha {
                 id: this.id + "-digit-2",
                 name: this.id + "-digit-2",
             });
-            this.expiryTimerEl = createEl("span");
             this.loaderEl = options.loaderEl ?? null;
 
             this.active = false;
-            this.expiryTimer = undefined;
-            this.expiryTimerAbortController = undefined;
+            this.#expiryTimerAbortController = null;
 
             this.activatorButtonEl.addEventListener("click", () => {
                 const fn = async () => await this.activate();
@@ -184,7 +180,7 @@ export default class SimpleMathsCaptcha {
         }
 
         this.active = true;
-        this.expiryTimerAbortController = new AbortController();
+        this.#expiryTimerAbortController = new AbortController();
 
         try {
             this.activatorButtonEl.remove();
@@ -211,27 +207,12 @@ export default class SimpleMathsCaptcha {
             this.digit2InputEl.value = digit2.toString();
             this.labelEl.after(this.answerInputEl, this.digit1InputEl, this.digit2InputEl);
 
-
-            let expiryTimeSec = Math.round(expiryTime / 1000);
-
-            this.expiryTimer = setInterval(() => {
-                expiryTimeSec = expiryTimeSec - 1;
-
-                if (expiryTimeSec < 6) {
-                    this.expiryTimerEl.textContent = `Expires in ${expiryTimeSec} s`;
-                    this.answerInputEl.after(this.expiryTimerEl);
-                }
-            }, 1000);
-
-            await wait(expiryTime, true, this.expiryTimerAbortController.signal)
-                .then(() => {
-                    clearInterval(this.expiryTimer);
             if (this.loaderEl) {
                 this.loaderEl.remove();
             }
 
-                    this.deactivate();
-                })
+            await wait(expiryTime, true, this.#expiryTimerAbortController.signal)
+                .then(() => this.deactivate())
                 .catch((abortReason) => console.info(abortReason));
 
             return;
@@ -250,14 +231,12 @@ export default class SimpleMathsCaptcha {
             return;
         }
 
-        clearInterval(this.expiryTimer);
-        this.expiryTimerAbortController?.abort("Scheduled deactivation aborted.");
+        this.#expiryTimerAbortController?.abort("Scheduled deactivation aborted.");
 
         this.labelEl.remove();
         this.answerInputEl.remove();
         this.digit1InputEl.remove();
         this.digit2InputEl.remove();
-        this.expiryTimerEl.remove();
 
         if (this.loaderEl) {
             this.loaderEl.remove();
