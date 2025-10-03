@@ -3,7 +3,7 @@ import Ntp, { Options as NtpOptions } from "@codebundlesbyvik/ntp-sync";
 
 interface Options {
     activatorButtonEl: HTMLButtonElement | HTMLInputElement;
-    baseId?: string;
+    id?: string;
     generatorEndpointUrl?: string;
     generatorEndpoint?: {
         url: RequestInfo | URL;
@@ -51,11 +51,7 @@ export default class SimpleMathsCaptcha {
                 throw new Error("Input must be a child of a <form>.");
             }
 
-            this.id = "simple-maths-captcha";
-
-            if (options.baseId) {
-                this.id = `${options.baseId}-${this.id}`;
-            }
+            this.id = options.id ?? "simple-maths-captcha";
 
             if (
                 SimpleMathsCaptcha.#instances.find(
