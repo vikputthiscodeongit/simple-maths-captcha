@@ -1,16 +1,22 @@
 import { createEl, fetchWithTimeout, wait } from "@codebundlesbyvik/js-helpers";
 import Ntp from "@codebundlesbyvik/ntp-sync";
 
-interface Options {
-    activatorButtonEl: HTMLButtonElement | HTMLInputElement;
-    id?: string;
-    ntp: Ntp;
-    generatorEndpointUrl?: string;
-    generatorEndpoint?: {
+interface OptionsGeneratorEndpointFetchUrl {
+    generatorEndpointUrl: string;
+}
+
+interface OptionsGeneratorEndpointFetchProps {
+    generatorEndpoint: {
         url: RequestInfo | URL;
         fetchOptions?: RequestInit;
         timeoutDuration?: number;
     };
+}
+
+type Options = (OptionsGeneratorEndpointFetchUrl | OptionsGeneratorEndpointFetchProps) & {
+    activatorButtonEl: HTMLButtonElement | HTMLInputElement;
+    id?: string;
+    ntp: Ntp;
     answerInputElClass?: string;
     answerInputElEventHandlers?: {
         type: string;
@@ -19,7 +25,7 @@ interface Options {
     }[];
     labelElLoadingTextContent?: string;
     loaderEl?: HTMLElement;
-}
+};
 
 export default class SimpleMathsCaptcha {
     activatorButtonEl: HTMLButtonElement | HTMLInputElement;
@@ -42,6 +48,11 @@ export default class SimpleMathsCaptcha {
     #expiryTimerAbortController: AbortController | null;
 
     constructor(options: Options) {
+        const isOptionsWithGeneratorEndpointFetchProps = (
+            options: Options,
+        ): options is Exclude<Options, OptionsGeneratorEndpointFetchUrl> =>
+            "generatorEndpoint" in options;
+
         try {
             this.activatorButtonEl = options.activatorButtonEl;
 
@@ -67,28 +78,14 @@ export default class SimpleMathsCaptcha {
                 id: this.id,
             });
 
-            if (options.generatorEndpointUrl && options.generatorEndpoint) {
-                console.warn(
-                    "`generatorEndpointUrl` and `generatorEndpoint.url` are both provided. `generatorEndpoint.url` takes preference.",
-                );
-            }
-
-            const generatorEndpointUrl = options.generatorEndpoint
-                ? options.generatorEndpoint.url
-                : options.generatorEndpointUrl;
-
-            if (!generatorEndpointUrl) {
-                throw new Error(
-                    "Problem generator endpoint URL must be provided, either as generatorEndpointUrl or generatorEndpoint.url.",
-                );
-            }
-
             this.#ntp = options.ntp;
-            this.#problemFetchOptions = [
-                generatorEndpointUrl,
-                options.generatorEndpoint?.fetchOptions,
-                options.generatorEndpoint?.timeoutDuration,
-            ];
+            this.#problemFetchOptions = isOptionsWithGeneratorEndpointFetchProps(options)
+                ? [
+                      options.generatorEndpoint.url,
+                      options.generatorEndpoint.fetchOptions,
+                      options.generatorEndpoint.timeoutDuration,
+                  ]
+                : [options.generatorEndpointUrl];
 
             // Activator button should be marked invalid when the form is submitted without
             // the CAPTCHA being active.
@@ -113,7 +110,7 @@ export default class SimpleMathsCaptcha {
             this.#labelElLoadingTextContent =
                 options.labelElLoadingTextContent ?? "Loading CAPTCHA";
             this.labelEl = createEl("label", {
-                for: this.answerInputEl.id,
+                for: answerInputElProps.id,
             });
             this.digit1InputEl = createEl("input", {
                 type: "hidden",
