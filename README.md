@@ -25,8 +25,8 @@ Easy to use, easy to solve CAPTCHA.
 ## Usage
 
 ``` shell
-# Install package from npm
-npm install @codebundlesbyvik/simple-maths-captcha
+# Install packages from npm
+npm install @codebundlesbyvik/simple-maths-captcha @codebundlesbyvik/ntp-sync
 ```
 
 If you're not using a module bundler then either:
@@ -47,21 +47,15 @@ const ntp = new Ntp({
 
         return convertUnixTimeFormatToMs(data.req_received_time);
     },
-    // Providing a t2CalcFn for greater accuracy is recommended but not required.
     t2CalcFn: function t2CalcFn(resHeaders: Headers) {
-        // Header value example: t=1747777363406069 D=110
         const header = resHeaders.get("Response-Timing");
 
-        if (!header) {
-            return null;
-        }
+        if (!header) return null;
 
         const reqReceivedTime = /\bt=([0-9]+)\b/.exec(header);
         const reqProcessingTime = /\bD=([0-9]+)\b/.exec(header);
 
-        if (!reqReceivedTime || !reqProcessingTime) {
-            return null;
-        }
+        if (!reqReceivedTime || !reqProcessingTime) return null;
 
         const resTransmitTime =
             Number.parseInt(reqReceivedTime[1]) + Number.parseInt(reqProcessingTime[1]);
@@ -76,7 +70,7 @@ const captcha = new SimpleMathsCaptcha({
 });
 ```
 
-The CAPTCHA initializes on instance creation. On press of the activator button a NTP sync is performed after which a maths problem is requested. The problem is inserted in the DOM, alongside 3 `<input>`s: the main one in which the user has to provide the answer and 2 hidden ones used to store the problem's individual digits. After the invalidation time provided by the back end has passed the CAPTCHA is automatically deactivated.
+The CAPTCHA initializes on instance creation. On press of the activator button a NTP sync is performed after which a maths problem is requested. The problem is inserted in the DOM, alongside 3 `<input>`s: the main one in which the user has to provide the answer and 2 hidden ones used to store the problem's individual digits. The CAPTCHA is automatically deactivated after the invalidation time provided by the back end has passed.
 
 The exact implementation of the back end components is up to you. If you need some inspiration you can check out [how I did it in PHP for my own website](https://github.com/vikputthiscodeongit/viktor-web/tree/main/php/controllers).
 
