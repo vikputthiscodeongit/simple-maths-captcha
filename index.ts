@@ -23,7 +23,7 @@ type Options = (OptionsGeneratorEndpointFetchUrl | OptionsGeneratorEndpointFetch
         listener: () => void;
         options?: AddEventListenerOptions;
     }[];
-    labelElLoadingTextContent?: string;
+    labelElLoadingText?: string;
     loaderEl?: HTMLElement;
 };
 
@@ -38,7 +38,7 @@ export default class SimpleMathsCaptcha {
     readonly fieldEl: HTMLElement;
     readonly #answerInputElDefaultProps: string[];
     readonly answerInputEl: HTMLInputElement;
-    labelElLoadingTextContent: string;
+    labelElLoadingText: string;
     readonly labelEl: HTMLLabelElement;
     readonly #digit1InputEl: HTMLInputElement;
     readonly #digit2InputEl: HTMLInputElement;
@@ -105,7 +105,7 @@ export default class SimpleMathsCaptcha {
         };
         this.#answerInputElDefaultProps = Object.keys(answerInputElProps);
         this.answerInputEl = createEl("input", answerInputElProps);
-        this.labelElLoadingTextContent = options.labelElLoadingTextContent ?? "Loading CAPTCHA";
+        this.labelElLoadingText = options.labelElLoadingText ?? "Loading CAPTCHA";
         this.labelEl = createEl("label", {
             for: answerInputElProps.id,
         });
@@ -197,7 +197,7 @@ export default class SimpleMathsCaptcha {
 
         this.activatorButtonEl.remove();
 
-        this.labelEl.textContent = this.labelElLoadingTextContent;
+        this.labelEl.textContent = this.labelElLoadingText;
         this.fieldEl.prepend(this.labelEl);
 
         if (this.loaderEl) {
