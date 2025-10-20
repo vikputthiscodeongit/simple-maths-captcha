@@ -28,23 +28,23 @@ type Options = (OptionsGeneratorEndpointFetchUrl | OptionsGeneratorEndpointFetch
 };
 
 export default class SimpleMathsCaptcha {
-    activatorButtonEl: HTMLButtonElement | HTMLInputElement;
-    id: string;
-    #ntp: Ntp;
-    #problemFetchOptions: [RequestInfo | URL, RequestInit?, number?];
+    readonly activatorButtonEl: HTMLButtonElement | HTMLInputElement;
+    readonly id: string;
+    ntp: Ntp;
+    readonly #problemFetchOptions: [RequestInfo | URL, RequestInit?, number?];
 
-    #activatorButtonElDefaultProps: string[];
-    formEl: HTMLFormElement;
-    fieldEl: HTMLElement;
-    #answerInputElDefaultProps: string[];
-    answerInputEl: HTMLInputElement;
-    #labelElLoadingTextContent: string;
-    labelEl: HTMLLabelElement;
-    digit1InputEl: HTMLInputElement;
-    digit2InputEl: HTMLInputElement;
+    readonly #activatorButtonElDefaultProps: string[];
+    readonly formEl: HTMLFormElement;
+    readonly fieldEl: HTMLElement;
+    readonly #answerInputElDefaultProps: string[];
+    readonly answerInputEl: HTMLInputElement;
+    labelElLoadingTextContent: string;
+    readonly labelEl: HTMLLabelElement;
+    readonly #digit1InputEl: HTMLInputElement;
+    readonly #digit2InputEl: HTMLInputElement;
     loaderEl: HTMLElement | null;
 
-    active: boolean;
+    #active: boolean;
     #expiryTimerAbortController: AbortController | null;
 
     constructor(options: Options) {
@@ -76,7 +76,7 @@ export default class SimpleMathsCaptcha {
             id: this.id,
         });
 
-        this.#ntp = options.ntp;
+        this.ntp = options.ntp;
         this.#problemFetchOptions = isOptionsWithGeneratorEndpointFetchProps(options)
             ? [
                   options.generatorEndpoint.url,
@@ -105,23 +105,23 @@ export default class SimpleMathsCaptcha {
         };
         this.#answerInputElDefaultProps = Object.keys(answerInputElProps);
         this.answerInputEl = createEl("input", answerInputElProps);
-        this.#labelElLoadingTextContent = options.labelElLoadingTextContent ?? "Loading CAPTCHA";
+        this.labelElLoadingTextContent = options.labelElLoadingTextContent ?? "Loading CAPTCHA";
         this.labelEl = createEl("label", {
             for: answerInputElProps.id,
         });
-        this.digit1InputEl = createEl("input", {
+        this.#digit1InputEl = createEl("input", {
             type: "hidden",
             id: this.id + "-digit-1",
             name: this.id + "-digit-1",
         });
-        this.digit2InputEl = createEl("input", {
+        this.#digit2InputEl = createEl("input", {
             type: "hidden",
             id: this.id + "-digit-2",
             name: this.id + "-digit-2",
         });
         this.loaderEl = options.loaderEl ?? null;
 
-        this.active = false;
+        this.#active = false;
         this.#expiryTimerAbortController = null;
 
         this.activatorButtonEl.addEventListener("click", () => {
@@ -144,18 +144,22 @@ export default class SimpleMathsCaptcha {
     static #instances: { activatorButtonEl: HTMLButtonElement | HTMLInputElement; id: string }[] =
         [];
 
+    get active() {
+        return this.#active;
+    }
+
     isCaptchaInputEl(id: string) {
         return (
             id === this.answerInputEl.id ||
-            id === this.digit1InputEl.id ||
-            id === this.digit2InputEl.id
+            id === this.#digit1InputEl.id ||
+            id === this.#digit2InputEl.id
         );
     }
 
     async #makeProblemData() {
-        console.info("#makeProblemData: Running...");
+        console.debug("#makeProblemData: Running...");
 
-        const ntpValues = await this.#ntp.sync();
+        const ntpValues = await this.ntp.sync();
 
         if (!ntpValues) {
             throw new Error("NTP values fetch failed.");
@@ -183,17 +187,17 @@ export default class SimpleMathsCaptcha {
     async activate() {
         console.info("activate: Running...");
 
-        if (this.active) {
+        if (this.#active) {
             console.warn("Already active.");
             return;
         }
 
-        this.active = true;
+        this.#active = true;
         this.#expiryTimerAbortController = new AbortController();
 
         this.activatorButtonEl.remove();
 
-        this.labelEl.textContent = this.#labelElLoadingTextContent;
+        this.labelEl.textContent = this.labelElLoadingTextContent;
         this.fieldEl.prepend(this.labelEl);
 
         if (this.loaderEl) {
@@ -211,9 +215,9 @@ export default class SimpleMathsCaptcha {
         const [digit1, digit2, expiryTime] = await this.#makeProblemData();
 
         this.labelEl.textContent = `${digit1} + ${digit2} =`;
-        this.digit1InputEl.value = digit1.toString();
-        this.digit2InputEl.value = digit2.toString();
-        this.labelEl.after(this.answerInputEl, this.digit1InputEl, this.digit2InputEl);
+        this.#digit1InputEl.value = digit1.toString();
+        this.#digit2InputEl.value = digit2.toString();
+        this.labelEl.after(this.answerInputEl, this.#digit1InputEl, this.#digit2InputEl);
 
         if (this.loaderEl) {
             this.loaderEl.remove();
@@ -229,7 +233,7 @@ export default class SimpleMathsCaptcha {
     deactivate() {
         console.info("deactivate: Running...");
 
-        if (!this.active) {
+        if (!this.#active) {
             console.warn("Already deactivated.");
             return;
         }
@@ -238,8 +242,8 @@ export default class SimpleMathsCaptcha {
 
         this.labelEl.remove();
         this.answerInputEl.remove();
-        this.digit1InputEl.remove();
-        this.digit2InputEl.remove();
+        this.#digit1InputEl.remove();
+        this.#digit2InputEl.remove();
 
         if (this.loaderEl) {
             this.loaderEl.remove();
@@ -253,7 +257,7 @@ export default class SimpleMathsCaptcha {
 
         this.fieldEl.prepend(this.activatorButtonEl);
 
-        this.active = false;
+        this.#active = false;
 
         return;
     }
