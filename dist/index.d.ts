@@ -1,41 +1,43 @@
-import Ntp, { Options as NtpOptions } from "@codebundlesbyvik/ntp-sync";
-interface Options {
-    activatorButtonEl: HTMLButtonElement | HTMLInputElement;
-    baseId?: string;
-    generatorEndpointUrl?: string;
-    generatorEndpoint?: {
+import type Ntp from "@codebundlesbyvik/ntp-sync";
+interface OptionsGeneratorEndpointFetchUrl {
+    dataEndpointUrl: string;
+}
+interface OptionsGeneratorEndpointFetchProps {
+    dataEndpoint: {
         url: RequestInfo | URL;
         fetchOptions?: RequestInit;
         timeoutDuration?: number;
     };
-    ntpOptions: NtpOptions;
+}
+type Options = (OptionsGeneratorEndpointFetchUrl | OptionsGeneratorEndpointFetchProps) & {
+    activatorButtonEl: HTMLButtonElement | HTMLInputElement;
+    id?: string;
+    ntp: Ntp;
+    dataHandlerFn: (response: Response) => Promise<[number, number, number] | null>;
+    answerInputElClass?: string;
     answerInputElEventHandlers?: {
         type: string;
         listener: () => void;
         options?: AddEventListenerOptions;
     }[];
-}
+    labelElLoadingText?: string;
+    loaderEl?: HTMLElement;
+};
 export default class SimpleMathsCaptcha {
     #private;
-    activatorButtonEl: HTMLButtonElement | HTMLInputElement;
-    id: string;
-    problemFetchOptions: [RequestInfo | URL, RequestInit?, number?];
+    readonly activatorButtonEl: HTMLButtonElement | HTMLInputElement;
+    readonly id: string;
     ntp: Ntp;
-    activatorButtonElDefaultProps: string[];
-    formEl: HTMLFormElement;
-    fieldEl: HTMLElement;
-    answerInputElDefaultProps: string[];
-    answerInputEl: HTMLInputElement;
-    labelEl: HTMLLabelElement;
-    digit1InputEl: HTMLInputElement;
-    digit2InputEl: HTMLInputElement;
-    expiryTimerEl: HTMLSpanElement;
-    loaderEl: HTMLDivElement;
-    active: boolean;
-    expiryTimer: ReturnType<typeof setInterval> | undefined;
-    expiryTimerAbortController: AbortController | undefined;
+    readonly formEl: HTMLFormElement;
+    readonly fieldEl: HTMLElement;
+    readonly answerInputEl: HTMLInputElement;
+    labelElLoadingText: string;
+    readonly labelEl: HTMLLabelElement;
+    readonly digit1InputEl: HTMLInputElement;
+    readonly digit2InputEl: HTMLInputElement;
+    loaderEl: HTMLElement | null;
     constructor(options: Options);
-    isCaptchaInputEl(id: string): boolean;
+    get active(): boolean;
     activate(): Promise<void>;
     deactivate(): void;
 }
