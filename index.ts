@@ -2,11 +2,11 @@ import { createEl, fetchWithTimeout, wait } from "@codebundlesbyvik/js-helpers";
 import Ntp from "@codebundlesbyvik/ntp-sync";
 
 interface OptionsGeneratorEndpointFetchUrl {
-    generatorEndpointUrl: string;
+    dataEndpointUrl: string;
 }
 
 interface OptionsGeneratorEndpointFetchProps {
-    generatorEndpoint: {
+    dataEndpoint: {
         url: RequestInfo | URL;
         fetchOptions?: RequestInit;
         timeoutDuration?: number;
@@ -31,7 +31,7 @@ export default class SimpleMathsCaptcha {
     readonly activatorButtonEl: HTMLButtonElement | HTMLInputElement;
     readonly id: string;
     ntp: Ntp;
-    readonly #problemFetchOptions: [RequestInfo | URL, RequestInit?, number?];
+    readonly #dataFetchOptions: [RequestInfo | URL, RequestInit?, number?];
 
     readonly #activatorButtonElDefaultProps: string[];
     readonly formEl: HTMLFormElement;
@@ -51,7 +51,7 @@ export default class SimpleMathsCaptcha {
         const isOptionsWithGeneratorEndpointFetchProps = (
             options: Options,
         ): options is Exclude<Options, OptionsGeneratorEndpointFetchUrl> =>
-            "generatorEndpoint" in options;
+            "dataEndpoint" in options;
 
         this.activatorButtonEl = options.activatorButtonEl;
 
@@ -77,13 +77,13 @@ export default class SimpleMathsCaptcha {
         });
 
         this.ntp = options.ntp;
-        this.#problemFetchOptions = isOptionsWithGeneratorEndpointFetchProps(options)
+        this.#dataFetchOptions = isOptionsWithGeneratorEndpointFetchProps(options)
             ? [
-                  options.generatorEndpoint.url,
-                  options.generatorEndpoint.fetchOptions,
-                  options.generatorEndpoint.timeoutDuration,
+                  options.dataEndpoint.url,
+                  options.dataEndpoint.fetchOptions,
+                  options.dataEndpoint.timeoutDuration,
               ]
-            : [options.generatorEndpointUrl];
+            : [options.dataEndpointUrl];
 
         // Activator button should be marked invalid when the form is submitted without
         // the CAPTCHA being active.
@@ -165,7 +165,7 @@ export default class SimpleMathsCaptcha {
             throw new Error("NTP values fetch failed.");
         }
 
-        const response = await fetchWithTimeout(...this.#problemFetchOptions);
+        const response = await fetchWithTimeout(...this.#dataFetchOptions);
 
         if (!response.ok) {
             throw new Error(`Problem fetch failed.`);
