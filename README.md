@@ -25,13 +25,13 @@ Easy to use, easy to solve CAPTCHA.
 
 ``` shell
 # Install packages from npm
-npm install @codebundlesbyvik/simple-maths-captcha @codebundlesbyvik/ntp-sync
+npm install @codebundlesbyvik/ntp-sync @codebundlesbyvik/simple-maths-captcha
 ```
 
-If you're not using a module bundler then either:
-
-* [Download the latest release from the GitHub releases page](https://github.com/vikputthiscodeongit/simple-maths-captcha/releases/latest), or
-* [Load the JavaScript](https://cdn.jsdelivr.net/npm/@codebundlesbyvik/simple-maths-captcha@1.1.0/dist/index.js) via the jsdelivr CDN.
+If you're not using a module bundler then:
+* Download the latest `@codebundlesbyvik/js-helpers` release [from GitHub](https://github.com/vikputthiscodeongit/js-helpers/releases/latest) or load it directly [via jsdelivr](https://cdn.jsdelivr.net/npm/@codebundlesbyvik/js-helpers@2.1.5/dist/index.js).
+* Download the latest `@codebundlesbyvik/ntp-sync` release [from GitHub](https://github.com/vikputthiscodeongit/ntp-sync/releases/latest) or load it directly [via jsdelivr](https://cdn.jsdelivr.net/npm/@codebundlesbyvik/ntp-sync@1.1.1/dist/index.js).
+* Download the latest `@codebundlesbyvik/simple-maths-captcha` release [from GitHub](https://github.com/vikputthiscodeongit/simple-maths-captcha/releases/latest) or load it directly [via jsdelivr](https://cdn.jsdelivr.net/npm/@codebundlesbyvik/simple-maths-captcha@2.0.0/dist/index.js).
 
 For the example below I assume the main JavaScript file is processed by a module bundler.
 
@@ -41,13 +41,18 @@ import SimpleMathsCaptcha from "@codebundlesbyvik/simple-maths-captcha";
 
 const ntp = new Ntp({
     t1EndpointUrl: "./api/ntp/get-server-time.php",
-    t1CalcFn: async function t1CalcFn(response: Response) {
-        const data = (await response.json()) as { req_received_time: number };
+    t1CalcFn: async function (response: Response) {
+        const fetchedData = (await response.json()) as unknown;
 
-        return convertUnixTimeFormatToMs(data.req_received_time);
+        const isValidData = (data: unknown): data is { req_received_time: number } =>
+            typeof data === "object" && data !== null && "req_received_time" in data;
+
+        return isValidData(fetchedData)
+            ? convertUnixTimeFormatToMs(fetchedData.req_received_time)
+            : null;
     },
-    t2CalcFn: function t2CalcFn(resHeaders: Headers) {
-        const header = resHeaders.get("Response-Timing");
+    t2CalcFn: function (responseHeaders: Headers) {
+        const header = responseHeaders.get("Response-Timing");
 
         if (!header) return null;
 
@@ -56,10 +61,10 @@ const ntp = new Ntp({
 
         if (!reqReceivedTime || !reqProcessingTime) return null;
 
-        const resTransmitTime =
+        const respTransmitTime =
             Number.parseInt(reqReceivedTime[1]) + Number.parseInt(reqProcessingTime[1]);
 
-        return convertUnixTimeFormatToMs(resTransmitTime);
+        return convertUnixTimeFormatToMs(respTransmitTime);
     },
 });
 const captcha = new SimpleMathsCaptcha({
@@ -81,7 +86,7 @@ const captcha = new SimpleMathsCaptcha({
 
 The CAPTCHA initializes on instance creation. On press of the activator button a NTP sync is performed after which a maths problem is requested. The problem is inserted in the DOM, alongside 3 `<input>`s: the main one in which the user has to provide the answer and 2 hidden ones used to store the problem's individual digits. The CAPTCHA is automatically deactivated after the invalidation time provided by the back end has passed.
 
-The exact implementation of the back end components is up to you. If you need some inspiration you can check out [how I did it in PHP for my own website](https://github.com/vikputthiscodeongit/viktor-web/tree/main/php/controllers).
+The exact implementation of the back end component is up to you. If you need some inspiration you can check out [how I did it in PHP for my own website](https://github.com/vikputthiscodeongit/viktor-web/tree/main/php/controllers/simple-maths-captcha).
 
 <br>
 
