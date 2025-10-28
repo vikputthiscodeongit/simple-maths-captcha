@@ -1,5 +1,5 @@
 import { createEl, fetchWithTimeout, wait } from "@codebundlesbyvik/js-helpers";
-import Ntp from "@codebundlesbyvik/ntp-sync";
+import type Ntp from "@codebundlesbyvik/ntp-sync";
 
 interface OptionsGeneratorEndpointFetchUrl {
     dataEndpointUrl: string;
