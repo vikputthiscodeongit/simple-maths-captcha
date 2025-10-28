@@ -17,7 +17,7 @@ type Options = (OptionsGeneratorEndpointFetchUrl | OptionsGeneratorEndpointFetch
     activatorButtonEl: HTMLButtonElement | HTMLInputElement;
     id?: string;
     ntp: Ntp;
-    dataHandlerFn: (response: Response) => Promise<[number, number, number]>;
+    dataHandlerFn: (response: Response) => Promise<[number, number, number] | null>;
     answerInputElClass?: string;
     answerInputElEventHandlers?: {
         type: string;
