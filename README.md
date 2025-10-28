@@ -45,11 +45,11 @@ const ntp = new Ntp({
     t1CalcFn: async function (response: Response) {
         const fetchedData = (await response.json()) as unknown;
 
-        const isValidData = (data: unknown): data is { req_received_time: number } =>
-            typeof data === "object" && data !== null && "req_received_time" in data;
+        const isValidData = (data: unknown): data is { received_time: number } =>
+            typeof data === "object" && data !== null && "received_time" in data;
 
         return isValidData(fetchedData)
-            ? convertUnixTimeFormatToMs(fetchedData.req_received_time)
+            ? convertUnixTimeFormatToMs(fetchedData.received_time)
             : null;
     },
     t2CalcFn: function (responseHeaders: Headers) {
@@ -74,12 +74,12 @@ const captcha = new SimpleMathsCaptcha({
     dataHandlerFn: async function (response: Response) {
         const fetchedData = (await response.json()) as unknown;
 
-        const isProblemData = (data: unknown): data is [number, number, number] =>
+        const isValidData = (data: unknown): data is [number, number, number] =>
             Array.isArray(data) &&
             data.length === 3 &&
             data.every((item) => typeof item === "number");
 
-        return isProblemData(fetchedData) ? fetchedData : null;
+        return isValidData(fetchedData) ? fetchedData : null;
     },
     ntp,
 });
