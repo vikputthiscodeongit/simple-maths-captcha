@@ -65,6 +65,16 @@ const ntp = new Ntp({
 const captcha = new SimpleMathsCaptcha({
     activatorButtonEl: document.querySelector("#simple-maths-captcha-activator-button"),
     dataEndpointUrl: "./api/simple-maths-captcha/generate-problem.php",
+    dataHandlerFn: async function (response: Response) {
+        const fetchedData = (await response.json()) as unknown;
+
+        const isProblemData = (data: unknown): data is [number, number, number] =>
+            Array.isArray(data) &&
+            data.length === 3 &&
+            data.every((item) => typeof item === "number");
+
+        return isProblemData(fetchedData) ? fetchedData : null;
+    },
     ntp,
 });
 ```
@@ -90,6 +100,7 @@ Requires an ECMAScript 2022 (ES13) compatible browser. Practically speaking, all
 | `ntp`<br> **Required**                                             | [@codebundlesbyvik/ntp-sync](https://github.com/vikputthiscodeongit/ntp-sync?tab=readme-ov-file) instance                                                                                | -                        | `@codebundlesbyvik/ntp-sync` instance used for NTP sync before problem generation.                                                                                                                                                                         |
 | `dataEndpointUrl`<br> **Required if `dataEndpoint` not provided.** | `string`                                                                                                                                                                                 | -                        | URL of the endpoint to retrieve the problem data from.                                                                                                                                                                                                     |
 | `dataEndpoint`<br> **Required if `dataEndpointUrl` not provided.** | [@codebundlesbyvik/js-helpers `fetchWithTimeout` parameters](https://github.com/vikputthiscodeongit/js-helpers?tab=readme-ov-file#fetchwithtimeoutresource-fetchoptions-timeoutduration) | -                        | Parameters for the fetcher used to retrieve the problem data.                                                                                                                                                                                              |
+| `dataHandlerFn`                                                    | `(response: Response) => Promise<[number, number, number] \| null>`                                                                                                                      | `undefined`              | Function used to process problem data. Must return an **array** of which the **first 2 items** are the **maths problem digits** and the **final item** is **Unix timestamp in milliseconds after which the problem is invalidated**.                       |                                                                                                                                                                                                                 |
 | `answerInputElClass`                                               | `string`                                                                                                                                                                                 | `undefined`              | HTML `class` to add to the main `<input>`.                                                                                                                                                                                                                 |
 | `answerInputElEventHandlers`                                       | [`addEventListener()` parameters](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#parameters)                                                              | `undefined`              | Event handlers to add to the main `<input>`.                                                                                                                                                                                                               |
 | `labelElLoadingText`                                               | `string`                                                                                                                                                                                 | `"Loading CAPTCHA"`      | Text shown as `<label>` content when loading.                                                                                                                                                                                                              |

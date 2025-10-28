@@ -17,6 +17,7 @@ type Options = (OptionsGeneratorEndpointFetchUrl | OptionsGeneratorEndpointFetch
     activatorButtonEl: HTMLButtonElement | HTMLInputElement;
     id?: string;
     ntp: Ntp;
+    dataHandlerFn: (response: Response) => Promise<[number, number, number]>;
     answerInputElClass?: string;
     answerInputElEventHandlers?: {
         type: string;
@@ -32,6 +33,7 @@ export default class SimpleMathsCaptcha {
     readonly id: string;
     ntp: Ntp;
     readonly #dataFetchOptions: [RequestInfo | URL, RequestInit?, number?];
+    readonly #dataHandlerFn: (response: Response) => Promise<[number, number, number] | null>;
 
     readonly #activatorButtonElDefaultProps: string[];
     readonly formEl: HTMLFormElement;
@@ -84,6 +86,7 @@ export default class SimpleMathsCaptcha {
                   options.dataEndpoint.timeoutDuration,
               ]
             : [options.dataEndpointUrl];
+        this.#dataHandlerFn = options.dataHandlerFn;
 
         // Activator button should be marked invalid when the form is submitted without
         // the CAPTCHA being active.
@@ -163,14 +166,14 @@ export default class SimpleMathsCaptcha {
             throw new Error(`Problem fetch failed.`);
         }
 
-        const fetchedData = (await response.json()) as {
-            problem_data: [number, number, number];
-        };
-        console.debug("#makeProblemData - fetchedData:", fetchedData);
-        const [digit1, digit2, invalidAfterTime] = fetchedData.problem_data;
+        const data = await this.#dataHandlerFn(response);
 
-        const expiryTime = Math.ceil(Math.max(invalidAfterTime - ntpValues.correctedDate, 0));
-        const problemData = [digit1, digit2, expiryTime];
+        if (!data) {
+            throw new Error("Fetched data doesn't satisfy problem data constraints.");
+        }
+
+        const expiryTime = Math.ceil(Math.max(data[2] - ntpValues.correctedDate, 0));
+        const problemData = [data[0], data[1], expiryTime];
         console.debug("#makeProblemData - problemData:", problemData);
 
         return problemData;
