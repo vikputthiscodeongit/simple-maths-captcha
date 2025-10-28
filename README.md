@@ -17,7 +17,8 @@ Easy to use, easy to solve CAPTCHA.
 4. [Methods](#methods)
     * [`.activate()`](#activate)
     * [`.deactivate()`](#deactivate)
-5. [License](#license)
+5. [Upgrading from 1.x.x](#upgrading-from-1xx)
+6. [License](#license)
 
 <br>
 
@@ -115,17 +116,26 @@ Requires an ECMAScript 2022 (ES13) compatible browser. Practically speaking, all
 
 ## Methods
 
-
-
-The following methods are automatically called when needed.
-
 ### `.activate()`
 
-Performs NTP sync, requests a new maths problem, inserts it and 3 `<input>`s (one of which used by the user for providing the answer) in the DOM and schedules `.deactivate()` call.
+Performs NTP sync, requests a new maths problem, inserts it and the 3 `<input>`s in the DOM and schedules `.deactivate()`.
 
 ### `.deactivate()`
 
-Removes the `<input>` for providing the answer from the DOM and inserts the activator button.
+Removes the `<input>`s from the DOM and inserts the activator button. Automatically called after invalidation time has passed.
+
+<br>
+
+## Upgrading from 1.x.x
+
+The following changes are breaking:
+* **Added:** `dataHandlerFn` for processing problem data endpoint response.
+* **Removed:** Expiry timer element.
+* **Renamed:** `generatorEndpoint` > `dataEndpoint`
+* **Renamed:** `labelElLoadingTextContent` > `labelElLoadingText`
+* **Changed:** Renamed `baseId` to `id` as it's now used as ID instead of as a prefix for `simple-maths-captcha`.
+* **Changed:** Require NTP instance instead of NTP instance options.
+* **Changed:** Undocumented but public class field visibility & mutability.
 
 <br>
 
