@@ -148,14 +148,6 @@ export default class SimpleMathsCaptcha {
         return this.#active;
     }
 
-    isCaptchaInputEl(id: string) {
-        return (
-            id === this.answerInputEl.id ||
-            id === this.#digit1InputEl.id ||
-            id === this.#digit2InputEl.id
-        );
-    }
-
     async #makeProblemData() {
         console.debug("#makeProblemData: Running...");
 
