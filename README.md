@@ -15,7 +15,6 @@ Easy to use, easy to solve CAPTCHA.
 2. [Browser support](#browser-support)
 3. [Instance options](#instance-options)
 4. [Methods](#methods)
-    * [`.isCaptchaInputEl(id: string)`](#iscaptchainputelid-string)
     * [`.activate()`](#activate)
     * [`.deactivate()`](#deactivate)
 5. [License](#license)
@@ -100,11 +99,7 @@ Requires an ECMAScript 2022 (ES13) compatible browser. Practically speaking, all
 
 ## Methods
 
-### `.isCaptchaInputEl(id: string)`
 
-Check if the provided `id` matches the `id` of a CAPTCHA `<input>`.
-
-<br>
 
 The following methods are automatically called when needed.
 
