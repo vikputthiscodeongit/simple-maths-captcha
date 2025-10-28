@@ -40,8 +40,8 @@ export default class SimpleMathsCaptcha {
     readonly answerInputEl: HTMLInputElement;
     labelElLoadingText: string;
     readonly labelEl: HTMLLabelElement;
-    readonly #digit1InputEl: HTMLInputElement;
-    readonly #digit2InputEl: HTMLInputElement;
+    readonly digit1InputEl: HTMLInputElement;
+    readonly digit2InputEl: HTMLInputElement;
     loaderEl: HTMLElement | null;
 
     #active: boolean;
@@ -109,12 +109,12 @@ export default class SimpleMathsCaptcha {
         this.labelEl = createEl("label", {
             for: answerInputElProps.id,
         });
-        this.#digit1InputEl = createEl("input", {
+        this.digit1InputEl = createEl("input", {
             type: "hidden",
             id: this.id + "-digit-1",
             name: this.id + "-digit-1",
         });
-        this.#digit2InputEl = createEl("input", {
+        this.digit2InputEl = createEl("input", {
             type: "hidden",
             id: this.id + "-digit-2",
             name: this.id + "-digit-2",
@@ -215,9 +215,9 @@ export default class SimpleMathsCaptcha {
         const [digit1, digit2, expiryTime] = await this.#makeProblemData();
 
         this.labelEl.textContent = `${digit1} + ${digit2} =`;
-        this.#digit1InputEl.value = digit1.toString();
-        this.#digit2InputEl.value = digit2.toString();
-        this.labelEl.after(this.answerInputEl, this.#digit1InputEl, this.#digit2InputEl);
+        this.digit1InputEl.value = digit1.toString();
+        this.digit2InputEl.value = digit2.toString();
+        this.labelEl.after(this.answerInputEl, this.digit1InputEl, this.digit2InputEl);
 
         if (this.loaderEl) {
             this.loaderEl.remove();
@@ -242,8 +242,8 @@ export default class SimpleMathsCaptcha {
 
         this.labelEl.remove();
         this.answerInputEl.remove();
-        this.#digit1InputEl.remove();
-        this.#digit2InputEl.remove();
+        this.digit1InputEl.remove();
+        this.digit2InputEl.remove();
 
         if (this.loaderEl) {
             this.loaderEl.remove();
