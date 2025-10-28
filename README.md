@@ -130,11 +130,13 @@ Removes the `<input>`s from the DOM and inserts the activator button. Automatica
 
 The following changes are breaking:
 * **Added:** `dataHandlerFn` for processing problem data endpoint response.
+* **Removed:** `.isCaptchaEl()`
 * **Removed:** Expiry timer element.
-* **Renamed:** `generatorEndpoint` > `dataEndpoint`
-* **Renamed:** `labelElLoadingTextContent` > `labelElLoadingText`
-* **Changed:** Renamed `baseId` to `id` as it's now used as ID instead of as a prefix for `simple-maths-captcha`.
+* **Renamed:** `options.generatorEndpoint` > `options.dataEndpoint`
+* **Renamed:** `options.labelElLoadingTextContent` > `options.labelElLoadingText`
+* **Changed:** `options.baseId` > `options.id` - it's now used as ID instead of as a prefix for `simple-maths-captcha`.
 * **Changed:** Require NTP instance instead of NTP instance options.
+* **Changed:** Removed built-in loading spinner element in favor of `options.loaderEl`.
 * **Changed:** Undocumented but public class field visibility & mutability.
 
 <br>
