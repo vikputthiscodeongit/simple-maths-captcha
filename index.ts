@@ -172,7 +172,9 @@ export default class SimpleMathsCaptcha {
             throw new Error("Fetched data doesn't satisfy problem data constraints.");
         }
 
-        const expiryTime = Math.ceil(Math.max(data[2] - ntpValues.correctedDate, 0));
+        const expiryTime = Math.ceil(
+            Math.max(data[2] - new Date().valueOf() - ntpValues.clientOffset, 0),
+        );
         const problemData = [data[0], data[1], expiryTime];
         console.debug("#makeProblemData - problemData:", problemData);
 
