@@ -17,7 +17,13 @@ type Options = (OptionsGeneratorEndpointFetchUrl | OptionsGeneratorEndpointFetch
     activatorButtonEl: HTMLButtonElement | HTMLInputElement;
     id?: string;
     ntp: Ntp;
-    dataHandlerFn: (response: Response) => Promise<[number, number, number] | null>;
+    dataHandlerFn: (
+        response: Response,
+    ) => Promise<
+        | { digit1: number; digit2: number; validForTime: number; generationTime: number }
+        | [number, number, number]
+        | null
+    >;
     answerInputElClass?: string;
     answerInputElEventHandlers?: {
         type: string;
@@ -33,7 +39,13 @@ export default class SimpleMathsCaptcha {
     readonly id: string;
     ntp: Ntp;
     readonly #dataFetchOptions: [RequestInfo | URL, RequestInit?, number?];
-    readonly #dataHandlerFn: (response: Response) => Promise<[number, number, number] | null>;
+    readonly #dataHandlerFn: (
+        response: Response,
+    ) => Promise<
+        | { digit1: number; digit2: number; validForTime: number; generationTime: number }
+        | [number, number, number]
+        | null
+    >;
 
     readonly #activatorButtonElDefaultProps: string[];
     readonly formEl: HTMLFormElement;
@@ -172,11 +184,17 @@ export default class SimpleMathsCaptcha {
             throw new Error("Fetched data doesn't satisfy problem data constraints.");
         }
 
-        const expiryTime = Math.ceil(
-            Math.max(data[2] - (new Date().valueOf() + ntpValues.clientOffset), 0),
-        );
-        const problemData = [data[0], data[1], expiryTime];
-        console.debug("#makeProblemData - problemData:", problemData);
+        let problemData = null;
+
+        if (Array.isArray(data)) {
+            const expiryTime = data[2] - (new Date().valueOf() + ntpValues.clientOffset);
+            problemData = [data[0], data[1], Math.max(expiryTime, 0)];
+        } else {
+            const expiryTime =
+                data.validForTime -
+                (new Date().valueOf() + ntpValues.clientOffset - data.generationTime);
+            problemData = [data.digit1, data.digit2, Math.max(expiryTime, 0)];
+        }
 
         return problemData;
     }
