@@ -173,7 +173,7 @@ export default class SimpleMathsCaptcha {
         }
 
         const expiryTime = Math.ceil(
-            Math.max(data[2] - new Date().valueOf() - ntpValues.clientOffset, 0),
+            Math.max(data[2] - (new Date().valueOf() + ntpValues.clientOffset), 0),
         );
         const problemData = [data[0], data[1], expiryTime];
         console.debug("#makeProblemData - problemData:", problemData);
